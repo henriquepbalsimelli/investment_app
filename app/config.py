@@ -1,5 +1,8 @@
 from pydantic import BaseModel
 import os
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 class Settings(BaseModel):
     OF_BASE_URL: str = 'https://banking-openfinance.xpi.com.br'
@@ -10,4 +13,36 @@ class Settings(BaseModel):
     class Config:
         env_file = ".env"
 
+class DatabaseSettings(BaseModel):
+    DB_HOST: str = os.getenv("DB_HOST")
+    DB_PORT: str = os.getenv("DB_PORT")
+    DB_NAME: str = os.getenv("DB_NAME")
+    DB_USER: str = os.getenv("DB_USER")
+    DB_PASSWORD: str = os.getenv("DB_PASSWORD")
+
+    class Config:
+        env_file = ".env"
+
+def get_database_url():
+    return f"postgresql+asyncpg://{settings_db.DB_USER}:{settings_db.DB_PASSWORD}@{settings_db.DB_HOST}:{settings_db.DB_PORT}/{settings_db.DB_NAME}"
+
 settings = Settings()
+settings_db = DatabaseSettings()
+DATABASE_URL = get_database_url()
+
+engine = create_async_engine(DATABASE_URL, echo=True, future=True)
+AsyncSessionLocal = sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+@property
+def db():
+    db = AsyncSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+Base = declarative_base()

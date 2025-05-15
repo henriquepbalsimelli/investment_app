@@ -1,0 +1,22 @@
+services:
+  db_investments_app:
+    image: postgres:15
+    container_name: investments_app_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - investments_db_data:/var/lib/postgresql/data
+    networks:
+      - investments_net
+
+volumes:
+  investments_db_data:
+
+networks:
+  investments_net:
+    driver: bridge
