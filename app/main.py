@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from app.router.investments_router import router as investments_router
 from app.router.auth_router import router as auth_router
+from app.router.user_router import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Open Finance - XP Transactions", version="0.1.0")
 app.include_router(investments_router)
 app.include_router(auth_router)
+app.include_router(user_router)
 
 # Configure CORS middleware
 origins = [
